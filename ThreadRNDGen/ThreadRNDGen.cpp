@@ -9,6 +9,7 @@ int main()
 	DWORD ldwThreadID;
 	HANDLE lhThread;
 	clsRandomGen* lobjRandomGen;
+    char volba;
 
 	//vytvoření objektu
 	lobjRandomGen = new clsRandomGen();
@@ -17,13 +18,23 @@ int main()
 
 	lhThread = CreateThread(NULL, 0, MyThreadStarter, lobjRandomGen, 0, &ldwThreadID);
 
-	// generovat
-	lintCislo = lobjRandomGen->GetRND();
-	printf("%i", lintCislo);
+    // hlavní smyčka programu
+    while (true) {
+        volba = getchar();
 
-	// pozastavit na 10s
-	Sleep(10000);
+         // čtení klávesy bez nutnosti stisknout Enter
+        if (volba == 'n' || volba == 'N')
+        {
+            // generovat a vypsat číslo
+            printf("%i\n", lobjRandomGen->GetRND());
+        }
+        else if (volba == 'q' || volba == 'Q')
+        {
+            break;  // ukončení programu
+        }
+    }
 
 	delete(lobjRandomGen);
+    return 0;
 }
 
