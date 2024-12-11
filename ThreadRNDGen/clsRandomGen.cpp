@@ -1,4 +1,5 @@
 #include "clsRandomGen.h"
+#include <time.h>
 
 //--------------------------------------
 //start threadu
@@ -16,9 +17,30 @@ DWORD WINAPI MyThreadStarter(LPVOID lpParam)
 //--------------------------------------
 //konstruktor
 //--------------------------------------
-clsRandomGen::~clsRandomGen()
+clsRandomGen::clsRandomGen()
 {
+	// init critické sekce
+	InitializeCriticalSection(&mcsGenerator);
 
+	// seed generatoru
+	srand(time(NULL));
+
+	// generovat cislo
+	mintActNumber = rand();
+
+	// thread bude bezet
+	mblThreadStop = false;
+}
+
+//--------------------------------------
+//destruktor
+//--------------------------------------
+clsRandomGen ::~clsRandomGen()
+{
+	mblThreadStop = true;
+
+	// samazání critické sekce
+	DeleteCriticalSection(&mcsGenerator);
 }
 
 //--------------------------------------
@@ -26,12 +48,51 @@ clsRandomGen::~clsRandomGen()
 //--------------------------------------
 void clsRandomGen::ThreadGen()
 {
+	try
+	{
 
+		do
+		{
+		
+			// vstoupit
+			EnterCriticalSection(&mcsGenerator);
+
+			//generovat cislo
+			mintActNumber = rand();
+
+			// vystoupit
+			LeaveCriticalSection(&mcsGenerator);
+
+		}
+		while (mblThreadStop == false);
+
+	}
+	catch (...)
+
+	{
+		// vystoupit
+		LeaveCriticalSection(&mcsGenerator);
+	}
 }
+
 //--------------------------------------
 //vrací aktuální èíslo
 //--------------------------------------
 int clsRandomGen::GetRND()
 {
+	int lintNumber;
+	// vstoupit
+	EnterCriticalSection(&mcsGenerator);
 
+	lintNumber = mintActNumber;
+
+	// vystoupit
+	LeaveCriticalSection(&mcsGenerator);
+
+	return lintNumber;
 }
+
+
+
+//úkol: v mainu
+//		aby když zmáèknu N, tak se vygeneruje èíslo a když zmáèknu Q, tak program ukonèim

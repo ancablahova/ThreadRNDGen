@@ -7,6 +7,8 @@ class clsRandomGen
 {
 private:
 	int mintActNumber;
+	bool mblThreadStop;
+	CRITICAL_SECTION mcsGenerator;
 
 public:
 	clsRandomGen();
